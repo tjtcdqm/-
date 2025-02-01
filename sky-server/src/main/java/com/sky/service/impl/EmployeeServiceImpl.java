@@ -1,16 +1,20 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -79,5 +84,25 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         employeeMapper.insertEmployee(employee);
     }
+
+    @Override
+    public PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
+        // 底层要靠mysql的limit关键字实现分页查询
+        // select * from employee limit 0 , 10 表示从第零条开始，查询十条数据
+
+        // 第一个参数表示要取得页码数，第二个参数表示这个页需要多少条数据
+        // 他会在执行sql时，自动计算并追加limit
+        PageHelper.startPage(employeePageQueryDTO.getPage(),employeePageQueryDTO.getPageSize());
+
+        // 返回类型是固定的Page
+        Page<Employee> page = employeeMapper.employQuery(employeePageQueryDTO);
+
+        long total = page.getTotal();
+        List<Employee> result = page.getResult();
+
+        return new PageResult(total,result);
+
+    }
+
 
 }
