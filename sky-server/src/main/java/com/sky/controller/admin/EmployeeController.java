@@ -88,9 +88,22 @@ public class EmployeeController {
 
     @GetMapping("/page")
     @ApiOperation("员工分页查询")
+    // 这里的DTO是通过查询参数来提供的，可以不使用注解就能处理
+    // 前提是名字相同
+    // 如果是一个Java对象，如本例，则要求字段名字一样，且字段有相应的get和set函数
+    // 这被称为数据绑定
     public Result<PageResult> page(EmployeePageQueryDTO employeePageQueryDTO){
         PageResult pageResult = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pageResult);
+    }
+
+    @PostMapping("/status/{status}") // 设置占位符，并给占位符起名字。url支持正则表达式的用法
+    @ApiOperation("启用，禁用员工账号")
+    // PathVariable可以接收路径参数 路径参数（Path Parameters）在URL http://example.com/users/123 中，123 可能表示用户ID
+    // id是查询参数，只要同名就能自动处理
+    public Result enableOrDisableEmployeeAccount(@PathVariable(name = "status") Integer status,Long id){
+        employeeService.enableOrDisableEmployee(status,id);
+        return Result.success();
     }
 
 }
